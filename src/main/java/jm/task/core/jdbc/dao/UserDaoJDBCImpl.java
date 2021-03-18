@@ -52,16 +52,15 @@ public class UserDaoJDBCImpl implements UserDao {
     }
 
     public void saveUser(String name, String lastName, byte age) {
-
         try (Connection connection = Util.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(ADD_USER_QUERY)) {
             preparedStatement.setString(1, name);
             preparedStatement.setString(2, lastName);
             preparedStatement.setByte(3, age);
             preparedStatement.execute();
-            System.out.println("user " + name + " successfully added");
-        }catch (MysqlDataTruncation e){
-            System.out.println("Please enter correct data");
+            System.out.println("User " + name + " successfully added");
+        } catch (MysqlDataTruncation e) {
+            System.out.println("Failed to add user " + name + ". Please enter correct data.");
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -71,8 +70,13 @@ public class UserDaoJDBCImpl implements UserDao {
 
         try (Connection connection = Util.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(REMOVE_USER_QUERY)) {
-            preparedStatement.setLong(1,id);
-            preparedStatement.executeUpdate();
+            preparedStatement.setLong(1, id);
+             int changes = preparedStatement.executeUpdate();
+             if (changes == 1){
+                 System.out.println("User with id " + id + " successfully removed");
+             } else {
+                 System.out.println("User with id " + id + " don't exist");
+             }
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -91,7 +95,6 @@ public class UserDaoJDBCImpl implements UserDao {
                 user.setId(resultSet.getLong("id"));
                 userList.add(user);
             }
-
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -100,7 +103,7 @@ public class UserDaoJDBCImpl implements UserDao {
 
     public void cleanUsersTable() {
         try (Connection connection = Util.getConnection();
-        Statement statement = connection.createStatement()){
+             Statement statement = connection.createStatement()) {
             statement.executeUpdate(CLEAN_USERS_QUERY);
         } catch (SQLException throwables) {
             throwables.printStackTrace();

@@ -20,22 +20,10 @@ public class Util {
 
     public static Connection getConnection() throws SQLException {
         {
-//                driver = new com.mysql.cj.jdbc.Driver();
-//                DriverManager.registerDriver(driver);
             connection = DriverManager.getConnection(URL, USERNAME, PASSWORD);
-//            System.out.println("Successfully connected to database");
 
             return connection;
         }
     }
 
-    public static void closeConnection() {
-        try {
-            connection.close();
-            System.out.println("Connection successfully closed");
-        } catch (SQLException e) {
-            System.out.println("Can't close connection");
-            ;
-        }
-    }
 }
