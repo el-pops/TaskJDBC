@@ -24,6 +24,8 @@ public class UserDaoHibernateImpl implements UserDao {
 
             session.createSQLQuery(CREATE_TABLE_QUERY).executeUpdate();
             transaction.commit();
+        } catch (Exception e) {
+            System.err.println("Failed to create table. Please try again.");
         }
     }
 
@@ -35,6 +37,8 @@ public class UserDaoHibernateImpl implements UserDao {
             session.createSQLQuery(DROP_TABLE_QUERY).executeUpdate();
             transaction.commit();
 
+        } catch (Exception e) {
+            System.err.println("Failed to drop table. Please try again.");
         }
     }
 
@@ -45,6 +49,8 @@ public class UserDaoHibernateImpl implements UserDao {
             session.save(new User(name, lastName, age));
             transaction.commit();
             System.out.println("User " + name + " successfully added");
+        } catch (Exception e) {
+            System.err.println("Failed to save user. Please try again.");
         }
     }
 
@@ -59,6 +65,8 @@ public class UserDaoHibernateImpl implements UserDao {
                 System.out.println("User with id " + id + " successfully removed");
             } else
                 System.out.println("User with id " + id + " don't exist");
+        } catch (Exception e) {
+            System.err.println("Failed to remove user. Please try again.");
         }
     }
 
@@ -66,16 +74,20 @@ public class UserDaoHibernateImpl implements UserDao {
     public List<User> getAllUsers() {
         try (Session session = Util.getSessionFactory().openSession()) {
             return session.createQuery("from User").list();
+        } catch (Exception e){
+            System.err.println("Failed to get users. Please try again.");
+            return null;
         }
     }
 
     @Override
     public void cleanUsersTable() {
-        try(Session session = Util.getSessionFactory().openSession()) {
+        try (Session session = Util.getSessionFactory().openSession()) {
             Transaction transaction = session.beginTransaction();
             session.createQuery("delete from User ").executeUpdate();
             transaction.commit();
+        } catch (Exception e){
+            System.err.println("Failed to clean table. Please try again.");
         }
-
     }
 }
