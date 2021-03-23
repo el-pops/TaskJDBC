@@ -21,7 +21,6 @@ public class Util {
     public static Connection getConnection() throws SQLException {
         {
             connection = DriverManager.getConnection(URL, USERNAME, PASSWORD);
-
             return connection;
         }
     }
