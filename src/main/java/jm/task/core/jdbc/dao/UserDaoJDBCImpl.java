@@ -22,7 +22,7 @@ public class UserDaoJDBCImpl implements UserDao {
     private final String GET_ALL_USERS_QUERY =
             "SELECT * FROM users";
     private final String ADD_USER_QUERY =
-            "INSERT INTO users VALUES (default ,?,?,?)";
+            "INSERT INTO users VALUES(firstName, lastName, age) (default ,?,?,?)";
     private final String REMOVE_USER_QUERY =
             "DELETE FROM users WHERE id = ?";
     private final String CLEAN_USERS_QUERY =

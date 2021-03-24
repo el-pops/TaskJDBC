@@ -4,6 +4,8 @@ import jm.task.core.jdbc.model.User;
 import jm.task.core.jdbc.util.Util;
 import org.hibernate.*;
 
+import java.sql.SQLException;
+import java.sql.SQLSyntaxErrorException;
 import java.util.List;
 
 public class UserDaoHibernateImpl implements UserDao {
@@ -15,7 +17,7 @@ public class UserDaoHibernateImpl implements UserDao {
             + "PRIMARY KEY(id))";
     private final String DROP_TABLE_QUERY = "DROP TABLE IF EXISTS users ";
     private final String GET_ALL_USERS_QUERY = "from User";
-    private final String CLEAN_TABLE_QUERY = "delete from User ";
+    private final String CLEAN_TABLE_QUERY = "delete from User";
 
     public UserDaoHibernateImpl() {
     }
@@ -24,8 +26,13 @@ public class UserDaoHibernateImpl implements UserDao {
     public void createUsersTable() {
         try (Session session = Util.getSessionFactory().openSession()) {
             Transaction transaction = session.beginTransaction();
-            session.createSQLQuery(CREATE_TABLE_QUERY).executeUpdate();
-            transaction.commit();
+            try {
+                session.createSQLQuery(CREATE_TABLE_QUERY).executeUpdate();
+                transaction.commit();
+            } catch (Exception e) {
+                transaction.rollback();
+                System.err.println("Failed to create table. Please try again.");
+            }
         } catch (Exception e) {
             System.err.println("Failed to create table. Please try again.");
         }
@@ -35,9 +42,13 @@ public class UserDaoHibernateImpl implements UserDao {
     public void dropUsersTable() {
         try (Session session = Util.getSessionFactory().openSession()) {
             Transaction transaction = session.beginTransaction();
-            session.createSQLQuery(DROP_TABLE_QUERY).executeUpdate();
-            transaction.commit();
-
+            try {
+                session.createSQLQuery(DROP_TABLE_QUERY).executeUpdate();
+                transaction.commit();
+            } catch (Exception e) {
+                transaction.rollback();
+                System.err.println("Failed to drop table. Please try again.");
+            }
         } catch (Exception e) {
             System.err.println("Failed to drop table. Please try again.");
         }
@@ -47,9 +58,14 @@ public class UserDaoHibernateImpl implements UserDao {
     public void saveUser(String name, String lastName, byte age) {
         try (Session session = Util.getSessionFactory().openSession()) {
             Transaction transaction = session.beginTransaction();
-            session.save(new User(name, lastName, age));
-            transaction.commit();
-            System.out.println("User " + name + " successfully added");
+            try {
+                session.save(new User(name, lastName, age));
+                transaction.commit();
+                System.out.println("User " + name + " successfully added");
+            } catch (Exception e) {
+                transaction.rollback();
+                System.err.println("Failed to save user. Please try again.");
+            }
         } catch (Exception e) {
             System.err.println("Failed to save user. Please try again.");
         }
@@ -59,14 +75,19 @@ public class UserDaoHibernateImpl implements UserDao {
     public void removeUserById(long id) {
         try (Session session = Util.getSessionFactory().openSession()) {
             Transaction transaction = session.beginTransaction();
-            User user = session.get(User.class, id);
-            if (user != null) {
-                session.delete(user);
-                transaction.commit();
-                System.out.println("User with id " + id + " successfully removed");
-            } else
-                System.out.println("User with id " + id + " don't exist");
-        } catch (Exception e) {
+            try {
+                User user = session.get(User.class, id);
+                if (user != null) {
+                    session.delete(user);
+                    transaction.commit();
+                    System.out.println("User with id " + id + " successfully removed");
+                } else
+                    System.out.println("User with id " + id + " don't exist");
+            } catch (Exception e) {
+                transaction.rollback();
+                System.err.println("Failed to remove user. Please try again.");
+            }
+        } catch (TransactionException e) {
             System.err.println("Failed to remove user. Please try again.");
         }
     }
@@ -85,8 +106,13 @@ public class UserDaoHibernateImpl implements UserDao {
     public void cleanUsersTable() {
         try (Session session = Util.getSessionFactory().openSession()) {
             Transaction transaction = session.beginTransaction();
-            session.createQuery(CLEAN_TABLE_QUERY).executeUpdate();
-            transaction.commit();
+            try {
+                session.createQuery(CLEAN_TABLE_QUERY).executeUpdate();
+                transaction.commit();
+            } catch (Exception e) {
+                transaction.rollback();
+                System.err.println("Failed to clean table. Please try again.");
+            }
         } catch (Exception e) {
             System.err.println("Failed to clean table. Please try again.");
         }
