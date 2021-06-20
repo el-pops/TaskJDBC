@@ -2,10 +2,10 @@ package jm.task.core.jdbc.dao;
 
 import jm.task.core.jdbc.model.User;
 import jm.task.core.jdbc.util.Util;
-import org.hibernate.*;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
+import org.hibernate.TransactionException;
 
-import java.sql.SQLException;
-import java.sql.SQLSyntaxErrorException;
 import java.util.List;
 
 public class UserDaoHibernateImpl implements UserDao {
@@ -40,34 +40,32 @@ public class UserDaoHibernateImpl implements UserDao {
 
     @Override
     public void dropUsersTable() {
-        try (Session session = Util.getSessionFactory().openSession()) {
-            Transaction transaction = session.beginTransaction();
-            try {
-                session.createSQLQuery(DROP_TABLE_QUERY).executeUpdate();
-                transaction.commit();
-            } catch (Exception e) {
-                transaction.rollback();
-                System.err.println("Failed to drop table. Please try again.");
-            }
+        Session session = Util.getSessionFactory().openSession();
+        Transaction transaction = session.beginTransaction();
+        try {
+            session.createSQLQuery(DROP_TABLE_QUERY).executeUpdate();
+            transaction.commit();
         } catch (Exception e) {
+            transaction.rollback();
             System.err.println("Failed to drop table. Please try again.");
+        } finally {
+            session.close();
         }
     }
 
     @Override
     public void saveUser(String name, String lastName, byte age) {
-        try (Session session = Util.getSessionFactory().openSession()) {
-            Transaction transaction = session.beginTransaction();
-            try {
-                session.save(new User(name, lastName, age));
-                transaction.commit();
-                System.out.println("User " + name + " successfully added");
-            } catch (Exception e) {
-                transaction.rollback();
-                System.err.println("Failed to save user. Please try again.");
-            }
+        Session session = Util.getSessionFactory().openSession();
+        Transaction transaction = session.beginTransaction();
+        try {
+            session.save(new User(name, lastName, age));
+            transaction.commit();
+            System.out.println("User " + name + " successfully added");
         } catch (Exception e) {
+            transaction.rollback();
             System.err.println("Failed to save user. Please try again.");
+        } finally {
+            session.close();
         }
     }
 
