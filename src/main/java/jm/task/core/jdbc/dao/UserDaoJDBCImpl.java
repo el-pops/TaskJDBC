@@ -50,42 +50,37 @@ public class UserDaoJDBCImpl implements UserDao {
         }
     }
 
-    public void saveUser(String name, String lastName, byte age) {
-        try (Connection connection = Util.getConnection()) {
-            connection.setAutoCommit(false);
-            try (PreparedStatement preparedStatement = connection.prepareStatement(ADD_USER_QUERY)) {
-                preparedStatement.setString(1, name);
-                preparedStatement.setString(2, lastName);
-                preparedStatement.setByte(3, age);
-                preparedStatement.execute();
-                connection.commit();
-                System.out.println("User " + name + " successfully added");
-            } catch (MysqlDataTruncation e) {
-                System.out.println("Failed to add user " + name + ". Please enter correct data.");
-            } catch (SQLException e) {
-                connection.rollback();
-            }
+    public void saveUser(String name, String lastName, byte age) throws SQLException {
+        Connection connection = Util.getConnection();
+        connection.setAutoCommit(false);
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement(ADD_USER_QUERY);
+            preparedStatement.setString(1, name);
+            preparedStatement.setString(2, lastName);
+            preparedStatement.setByte(3, age);
+            preparedStatement.execute();
+            connection.commit();
+            System.out.println("User " + name + " successfully added");
+        } catch (MysqlDataTruncation e) {
+            System.out.println("Failed to add user " + name + ". Please enter correct data.");
         } catch (SQLException e) {
-            e.printStackTrace();
+            connection.rollback();
         }
     }
 
-    public void removeUserById(long id) {
-        try (Connection connection = Util.getConnection()) {
-            connection.setAutoCommit(false);
-            try (PreparedStatement preparedStatement = connection.prepareStatement(REMOVE_USER_QUERY)) {
-                preparedStatement.setLong(1, id);
-                int changes = preparedStatement.executeUpdate();
-                if (changes == 1) {
-                    System.out.println("User with id " + id + " successfully removed");
-                } else {
-                    System.out.println("User with id " + id + " don't exist");
-                }
-            } catch (SQLException e) {
-                connection.rollback();
+    public void removeUserById(long id) throws SQLException {
+        Connection connection = Util.getConnection();
+        connection.setAutoCommit(false);
+        try (PreparedStatement preparedStatement = connection.prepareStatement(REMOVE_USER_QUERY)) {
+            preparedStatement.setLong(1, id);
+            int changes = preparedStatement.executeUpdate();
+            if (changes == 1) {
+                System.out.println("User with id " + id + " successfully removed");
+            } else {
+                System.out.println("User with id " + id + " don't exist");
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            connection.rollback();
         }
     }
 

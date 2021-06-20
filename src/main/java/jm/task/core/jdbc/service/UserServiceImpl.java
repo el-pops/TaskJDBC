@@ -1,21 +1,16 @@
 package jm.task.core.jdbc.service;
 
-<<<<<<< Updated upstream
-=======
+
 import jm.task.core.jdbc.dao.UserDao;
 import jm.task.core.jdbc.dao.UserDaoHibernateImpl;
->>>>>>> Stashed changes
 import jm.task.core.jdbc.dao.UserDaoJDBCImpl;
 import jm.task.core.jdbc.model.User;
 
+import java.sql.SQLException;
 import java.util.List;
 
 public class UserServiceImpl implements UserService {
-<<<<<<< Updated upstream
-    UserDaoJDBCImpl userDao = new UserDaoJDBCImpl();
-=======
     UserDao userDao = new UserDaoJDBCImpl();
->>>>>>> Stashed changes
     public void createUsersTable() {
         userDao.createUsersTable();
     }
@@ -24,11 +19,11 @@ public class UserServiceImpl implements UserService {
         userDao.dropUsersTable();
     }
 
-    public void saveUser(String name, String lastName, byte age) {
+    public void saveUser(String name, String lastName, byte age) throws SQLException {
         userDao.saveUser(name, lastName, age);
     }
 
-    public void removeUserById(long id) {
+    public void removeUserById(long id) throws SQLException {
         userDao.removeUserById(id);
     }
 
