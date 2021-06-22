@@ -4,7 +4,6 @@ import jm.task.core.jdbc.model.User;
 import jm.task.core.jdbc.util.Util;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
-import org.hibernate.TransactionException;
 
 import java.util.List;
 
@@ -24,17 +23,16 @@ public class UserDaoHibernateImpl implements UserDao {
 
     @Override
     public void createUsersTable() {
-        try (Session session = Util.getSessionFactory().openSession()) {
-            Transaction transaction = session.beginTransaction();
-            try {
-                session.createSQLQuery(CREATE_TABLE_QUERY).executeUpdate();
-                transaction.commit();
-            } catch (Exception e) {
-                transaction.rollback();
-                System.err.println("Failed to create table. Please try again.");
-            }
+        Session session = Util.getSessionFactory().openSession();
+        Transaction transaction = session.beginTransaction();
+        try {
+            session.createSQLQuery(CREATE_TABLE_QUERY).executeUpdate();
+            transaction.commit();
         } catch (Exception e) {
+            transaction.rollback();
             System.err.println("Failed to create table. Please try again.");
+        } finally {
+            session.close();
         }
     }
 
@@ -71,22 +69,21 @@ public class UserDaoHibernateImpl implements UserDao {
 
     @Override
     public void removeUserById(long id) {
-        try (Session session = Util.getSessionFactory().openSession()) {
-            Transaction transaction = session.beginTransaction();
-            try {
-                User user = session.get(User.class, id);
-                if (user != null) {
-                    session.delete(user);
-                    transaction.commit();
-                    System.out.println("User with id " + id + " successfully removed");
-                } else
-                    System.out.println("User with id " + id + " don't exist");
-            } catch (Exception e) {
-                transaction.rollback();
-                System.err.println("Failed to remove user. Please try again.");
-            }
-        } catch (TransactionException e) {
+        Session session = Util.getSessionFactory().openSession();
+        Transaction transaction = session.beginTransaction();
+        try {
+            User user = session.get(User.class, id);
+            if (user != null) {
+                session.delete(user);
+                transaction.commit();
+                System.out.println("User with id " + id + " successfully removed");
+            } else
+                System.out.println("User with id " + id + " don't exist");
+        } catch (Exception e) {
+            transaction.rollback();
             System.err.println("Failed to remove user. Please try again.");
+        } finally {
+            session.close();
         }
     }
 
@@ -102,7 +99,7 @@ public class UserDaoHibernateImpl implements UserDao {
 
     @Override
     public void cleanUsersTable() {
-        try (Session session = Util.getSessionFactory().openSession()) {
+            Session session = Util.getSessionFactory().openSession();
             Transaction transaction = session.beginTransaction();
             try {
                 session.createQuery(CLEAN_TABLE_QUERY).executeUpdate();
@@ -110,9 +107,8 @@ public class UserDaoHibernateImpl implements UserDao {
             } catch (Exception e) {
                 transaction.rollback();
                 System.err.println("Failed to clean table. Please try again.");
+            } finally {
+                session.close();
             }
-        } catch (Exception e) {
-            System.err.println("Failed to clean table. Please try again.");
-        }
     }
 }
